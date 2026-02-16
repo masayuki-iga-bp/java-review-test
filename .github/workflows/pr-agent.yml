@@ -1,0 +1,44 @@
+name: PR Agent Review
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  pr-agent:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PR-Agent
+        run: |
+          pip install pr-agent
+
+      - name: Run PR-Agent Review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB__USER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AZURE_OPENAI__API_TYPE: azure
+          AZURE_OPENAI__API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
+          AZURE_OPENAI__API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI__API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
+          AZURE_OPENAI__DEPLOYMENT_ID: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_ID }}
+          CONFIG__MODEL: azure/${{ secrets.AZURE_OPENAI_DEPLOYMENT_ID }}
+          CONFIG__CUSTOM_MODEL_MAX_TOKENS: "128000"
+        run: |
+          python -m pr_agent.cli \
+            --pr_url=https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }} \
+            review
