@@ -1,0 +1,15 @@
+[config]
+model = "azure/gpt-4"
+model_turbo = "azure/gpt-4"
+fallback_models = ["azure/gpt-4"]
+custom_model_max_tokens = 128000
+
+[pr_reviewer]
+model = "azure/gpt-4"
+model_turbo = "azure/gpt-4"
+
+[pr_description]
+model = "azure/gpt-4"
+
+[pr_code_suggestions]
+model = "azure/gpt-4"
