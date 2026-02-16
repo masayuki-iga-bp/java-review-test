@@ -35,16 +35,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB__USER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AZURE_OPENAI__API_TYPE: azure
-          AZURE_OPENAI__API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
-          AZURE_OPENAI__API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-          AZURE_OPENAI__API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
-          AZURE_OPENAI__DEPLOYMENT_ID: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_ID }}
+          OPENAI__KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           OPENAI__API_TYPE: azure
           OPENAI__API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
           OPENAI__API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
-          OPENAI__API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           OPENAI__DEPLOYMENT_ID: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_ID }}
+          AZURE_API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
         run: |
           python -m pr_agent.cli \
             --pr_url=https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }} \
