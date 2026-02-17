@@ -4,6 +4,9 @@ model_turbo = "azure/gpt-5.2"
 fallback_models = []
 custom_model_max_tokens = 128000
 
+[github]
+user_token = "${GITHUB_TOKEN}"
+
 [openai]
 api_type = "azure"
 api_version = "2024-10-01-preview"

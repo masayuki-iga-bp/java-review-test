@@ -52,13 +52,18 @@ jobs:
           fi
 
       - name: Create configuration
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p .github
-          cat > .github/configuration.toml << 'CONFIG'
+          cat > .github/configuration.toml << CONFIG
           [config]
           model = "gpt-4o-mini"
           model_turbo = "gpt-4o-mini"
           fallback_models = []
+          
+          [github]
+          user_token = "${GITHUB_TOKEN}"
           
           [pr_reviewer]
           num_code_suggestions = 3

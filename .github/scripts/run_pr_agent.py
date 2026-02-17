@@ -11,6 +11,7 @@ import subprocess
 api_key = os.environ.get('AZURE_OPENAI_API_KEY', '')
 api_base = os.environ.get('AZURE_OPENAI_API_BASE', '')
 deployment_id = os.environ.get('AZURE_OPENAI_DEPLOYMENT_ID', 'gpt-5.2')
+github_token = os.environ.get('GITHUB_TOKEN', '')
 
 # 重要：/openai/v1 サフィックスを削除（litellmが自動追加するため）
 if api_base.endswith('/openai/v1'):
@@ -46,6 +47,10 @@ os.environ['OPENAI__API_TYPE'] = 'azure'
 os.environ['OPENAI__API_BASE'] = str(api_base)
 os.environ['OPENAI__API_VERSION'] = str(api_version)
 os.environ['OPENAI__DEPLOYMENT_ID'] = str(deployment_id)
+
+# GitHub token設定
+os.environ['GITHUB_TOKEN'] = str(github_token)
+os.environ['CONFIG__GITHUB__USER_TOKEN'] = str(github_token)
 
 # デバッグ情報
 print(f"Model Name: {model_name}")
