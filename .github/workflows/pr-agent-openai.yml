@@ -70,6 +70,7 @@ jobs:
           num_code_suggestions = 3
           require_tests_review = false
           require_score_review = false
+          extra_instructions = "すべてのレビューコメントを日本語で記述してください。"
           
           [pr_description]
           publish_description_as_comment = true
