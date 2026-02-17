@@ -9,11 +9,11 @@ api_type = "azure"
 api_version = "2024-10-01-preview"
 
 [pr_reviewer]
-model = "azure/gpt-4"
-model_turbo = "azure/gpt-4"
+model = "azure/gpt-5.2"
+model_turbo = "azure/gpt-5.2"
 
 [pr_description]
-model = "azure/gpt-4"
+model = "azure/gpt-5.2"
 
 [pr_code_suggestions]
-model = "azure/gpt-4"
+model = "azure/gpt-5.2"

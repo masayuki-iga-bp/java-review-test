@@ -25,8 +25,7 @@ jobs:
 
       - name: Install PR-Agent
         run: |
-          pip install pr-agent
-          pip install --upgrade litellm httpx
+          pip install --upgrade pr-agent
           
       - name: Copy configuration
         run: |
