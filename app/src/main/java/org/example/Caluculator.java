@@ -79,4 +79,25 @@ public class Caluculator {
         }
         return grade;
     }
+
+    // 問題のあるコード: ループ内での非効率な文字列結合
+    public String buildReport(int count) {
+        String report = "";
+        for (int i = 0; i < count; i++) {
+            report = report + "Line " + i + "\n";
+        }
+        return report;
+    }
+
+    // 問題のあるコード: ハードコードされた認証情報
+    public boolean authenticate(String username, String password) {
+        String adminUser = "admin";
+        String adminPass = "password123";
+        return username.equals(adminUser) && password.equals(adminPass);
+    }
+
+    // 問題のあるコード: nullチェックなし、JavaDocなし
+    public int calculateLength(String text) {
+        return text.length();
+    }
 }
