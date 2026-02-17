@@ -88,9 +88,12 @@ jobs:
           OPENAI__KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB__USER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CONFIG__MODEL: "gpt-4o-mini"
+          CONFIG__LANGUAGE: "ja"
+          PR_REVIEWER__EXTRA_INSTRUCTIONS: "必ず日本語でレビューコメントを記述してください。All review comments must be written in Japanese language."
         run: |
           echo "=== Environment ==="
           echo "Model: gpt-4o-mini (OpenAI)"
+          echo "Language: Japanese"
           echo "=== Running PR-Agent ==="
           python -m pr_agent.cli \
             --pr_url=https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }} \
