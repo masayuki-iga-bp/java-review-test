@@ -9,7 +9,11 @@ import subprocess
 
 # Explicitly set environment variables as strings
 os.environ['OPENAI_API_TYPE'] = str('azure')
-os.environ['OPENAI_API_VERSION'] = str('2024-10-01-preview')
+
+# Use V1 API endpoint (no api_version required according to management)
+# If using V1 endpoint, litellm might not require api_version
+# But we'll set it to the correct version from management: 2025-04-01
+os.environ['OPENAI_API_VERSION'] = str('2025-04-01')
 
 # Use gpt-4o as model name (tiktoken compatible) while actual deployment is set via DEPLOYMENT_ID
 # Force model configuration

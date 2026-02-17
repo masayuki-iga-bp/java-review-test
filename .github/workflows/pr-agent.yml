@@ -26,6 +26,7 @@ jobs:
       - name: Install PR-Agent
         run: |
           pip install --upgrade pr-agent
+          pip install --upgrade litellm httpx openai
           
       - name: Copy configuration
         run: |
