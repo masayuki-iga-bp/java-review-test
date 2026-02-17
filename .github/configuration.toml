@@ -1,7 +1,7 @@
 [config]
-model = "azure/gpt-4"
-model_turbo = "azure/gpt-4"
-fallback_models = ["azure/gpt-4"]
+model = "azure/gpt-5.2"
+model_turbo = "azure/gpt-5.2"
+fallback_models = ["azure/gpt-5.2"]
 custom_model_max_tokens = 128000
 
 [openai]
