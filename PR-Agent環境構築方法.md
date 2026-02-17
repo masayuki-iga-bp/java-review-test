@@ -62,11 +62,11 @@ gradle init
 |------|--------|------|
 | type of build | `application` | アプリケーションを作成 |
 | language | `Java` | Java を選択 |
-| target Java version | `17` | Java 17（推奨） |
+| target Java version | `21` | Java 21 |
 | Project name | `(そのままEnter)` | ディレクトリ名が使われる |
-| application structure | `1: Single application` | 単一アプリ |
-| build script DSL | `1: Groovy` | Groovy（標準） |
-| test framework | `4: JUnit Jupiter` | JUnit 5 |
+| application structure | `Single application` | 単一アプリ |
+| build script DSL | `Groovy` | Groovy（標準） |
+| test framework | `JUnit Jupiter` | JUnit 5 |
 | Generate new APIs | `no` | そのままEnter |
 
 **完了すると以下の構造が作成されます:**
@@ -297,7 +297,7 @@ git push origin main
 #### 4-1. 新しいブランチを作成
 
 ```bash
-git checkout -b feature/test-pr-agent
+git switch -c feature/test-pr-agent
 ```
 
 #### 4-2. テスト用のコード変更を追加
