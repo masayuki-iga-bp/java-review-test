@@ -34,6 +34,28 @@ jobs:
           echo "=== Configuration file content ==="
           cat configuration.toml
 
+      - name: Test Azure OpenAI Direct API Call
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+        run: |
+          echo "=== Testing Azure OpenAI API with curl ==="
+          
+          # Standard format test
+          echo "Test 1: Standard API format"
+          curl -X POST \
+            "https://aoairg-sub-aoai.openai.azure.com/openai/deployments/gpt-5.2/chat/completions?api-version=2024-10-01-preview" \
+            -H "Content-Type: application/json" \
+            -H "api-key: ${AZURE_API_KEY}" \
+            -d '{"messages": [{"role": "user", "content": "Test"}], "max_tokens": 10}' \
+            -w "\nHTTP Status: %{http_code}\n" \
+            2>&1 | tee curl-result.log
+          
+          if grep -q "200" curl-result.log || grep -q "content" curl-result.log; then
+            echo "✅ Direct API call successful!"
+          else
+            echo "⚠️  API call may have issues - continuing anyway"
+          fi
+
       - name: Run PR-Agent Review
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

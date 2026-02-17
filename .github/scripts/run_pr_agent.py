@@ -7,49 +7,71 @@ import os
 import sys
 import subprocess
 
-# Explicitly set environment variables as strings
-os.environ['OPENAI_API_TYPE'] = str('azure')
+# 環境変数を取得
+api_key = os.environ.get('AZURE_OPENAI_API_KEY', '')
+api_base = os.environ.get('AZURE_OPENAI_API_BASE', '')
+deployment_id = os.environ.get('AZURE_OPENAI_DEPLOYMENT_ID', 'gpt-5.2')
 
-# Use V1 API endpoint (no api_version required according to management)
-# If using V1 endpoint, litellm might not require api_version
-# But we'll set it to the correct version from management: 2025-04-01
-os.environ['OPENAI_API_VERSION'] = str('2025-04-01')
+# 重要：/openai/v1 サフィックスを削除（litellmが自動追加するため）
+if api_base.endswith('/openai/v1'):
+    api_base = api_base.rstrip('/openai/v1')
+    print(f"⚠️  Removed /openai/v1 from api_base")
 
-# Use gpt-4o as model name (tiktoken compatible) while actual deployment is set via DEPLOYMENT_ID
-# Force model configuration
-os.environ['CONFIG__MODEL'] = str('gpt-4o')
-os.environ['CONFIG__MODEL_TURBO'] = str('gpt-4o')
-os.environ['PR_REVIEWER__MODEL'] = str('gpt-4o')
+# API versionを安定版に変更
+api_version = '2024-10-01-preview'
 
-# Azure credentials (already set by GitHub Actions but ensure they're strings)
-if 'AZURE_OPENAI_API_KEY' in os.environ:
-    os.environ['OPENAI_KEY'] = str(os.environ['AZURE_OPENAI_API_KEY'])
-if 'AZURE_OPENAI_API_BASE' in os.environ:
-    os.environ['OPENAI_API_BASE'] = str(os.environ['AZURE_OPENAI_API_BASE'])
-if 'AZURE_OPENAI_DEPLOYMENT_ID' in os.environ:
-    os.environ['OPENAI_DEPLOYMENT_ID'] = str(os.environ['AZURE_OPENAI_DEPLOYMENT_ID'])
+print(f"=== Configuration ===")
+print(f"API Base: {api_base}")
+print(f"API Version: {api_version}")
+print(f"Deployment ID: {deployment_id}")
 
-print("=== Python Wrapper Environment ===")
-print(f"OPENAI_API_TYPE: {os.environ.get('OPENAI_API_TYPE')}")
-print(f"OPENAI_API_VERSION: {os.environ.get('OPENAI_API_VERSION')}")
-print(f"OPENAI_API_BASE: {os.environ.get('OPENAI_API_BASE', 'NOT SET')}")
-print(f"OPENAI_DEPLOYMENT_ID: {os.environ.get('OPENAI_DEPLOYMENT_ID', 'NOT SET')}")
-print(f"CONFIG__MODEL: {os.environ.get('CONFIG__MODEL')}")
-print(f"PR_REVIEWER__MODEL: {os.environ.get('PR_REVIEWER__MODEL')}")
-print("================================\n")
+# 重要：azure/ プレフィックスを使用してモデル名を構築
+model_name = f"azure/{deployment_id}"
 
-# Get PR URL from command line
+# 環境変数設定（litellm用）
+os.environ['OPENAI_API_KEY'] = str(api_key)
+os.environ['OPENAI_API_TYPE'] = 'azure'
+os.environ['OPENAI_API_BASE'] = str(api_base)
+os.environ['OPENAI_API_VERSION'] = str(api_version)
+os.environ['AZURE_API_KEY'] = str(api_key)
+os.environ['AZURE_API_BASE'] = str(api_base)
+os.environ['AZURE_API_VERSION'] = str(api_version)
+
+# PR-Agent用の設定（dynaconf形式）
+os.environ['CONFIG__MODEL'] = str(model_name)
+os.environ['CONFIG__MODEL_TURBO'] = str(model_name)
+os.environ['PR_REVIEWER__MODEL'] = str(model_name)
+os.environ['OPENAI__KEY'] = str(api_key)
+os.environ['OPENAI__API_TYPE'] = 'azure'
+os.environ['OPENAI__API_BASE'] = str(api_base)
+os.environ['OPENAI__API_VERSION'] = str(api_version)
+os.environ['OPENAI__DEPLOYMENT_ID'] = str(deployment_id)
+
+# デバッグ情報
+print(f"Model Name: {model_name}")
+print(f"Environment variables set for litellm and PR-Agent")
+print("=" * 40)
+
+# PR-Agent実行
 if len(sys.argv) < 2:
     print("Error: PR URL required as argument")
     sys.exit(1)
 
 pr_url = sys.argv[1]
-
-# Run PR-Agent
 print(f"Running PR-Agent for: {pr_url}\n")
-result = subprocess.run(
-    ['python', '-m', 'pr_agent.cli', '--pr_url', pr_url, 'review'],
-    env=os.environ.copy()
-)
 
-sys.exit(result.returncode)
+try:
+    result = subprocess.run(
+        ['python', '-m', 'pr_agent.cli', '--pr_url', pr_url, 'review'],
+        env=os.environ,
+        timeout=300
+    )
+    sys.exit(result.returncode)
+except subprocess.TimeoutExpired:
+    print("ERROR: PR-Agent timed out after 5 minutes", file=sys.stderr)
+    sys.exit(1)
+except Exception as e:
+    print(f"ERROR: {e}", file=sys.stderr)
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
