@@ -83,6 +83,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CONFIG__GITHUB__USER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "=== Environment ==="
           echo "Model: gpt-4o-mini (OpenAI)"
