@@ -2,10 +2,14 @@ name: PR Agent Review (OpenAI)
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types:
+      - opened        # PR作成時
+      - reopened      # クローズしたPRを再オープンした時
+      - synchronize   # PRに新しいコミットがプッシュされた時
   pull_request_review_comment:
-    types: [created]
-  workflow_dispatch:
+    types:
+      - created       # PRにレビューコメントが追加された時
+  workflow_dispatch:  # 手動実行を許可
 
 jobs:
   pr-agent:
