@@ -2,10 +2,14 @@ name: PR Agent Review (OpenAI)
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types:
+      - opened        # PR作成時
+      - reopened      # クローズしたPRを再オープンした時
+      - synchronize   # PRに新しいコミットがプッシュされた時
   pull_request_review_comment:
-    types: [created]
-  workflow_dispatch:
+    types:
+      - created       # PRにレビューコメントが追加された時
+  workflow_dispatch:  # 手動実行を許可
 
 jobs:
   pr-agent:
@@ -27,6 +31,7 @@ jobs:
       - name: Install PR-Agent
         run: |
           pip install --upgrade pr-agent
+          pip install --upgrade litellm httpx openai
 
       - name: Test OpenAI API Connection
         env:
@@ -60,6 +65,7 @@ jobs:
           model = "gpt-4o-mini"
           model_turbo = "gpt-4o-mini"
           fallback_models = []
+          language = "ja"
           
           [github]
           user_token = "${GITHUB_TOKEN}"
@@ -68,6 +74,7 @@ jobs:
           num_code_suggestions = 3
           require_tests_review = false
           require_score_review = false
+          extra_instructions = "すべてのレビューコメントを日本語で記述してください。"
           
           [pr_description]
           publish_description_as_comment = true
@@ -85,9 +92,12 @@ jobs:
           OPENAI__KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB__USER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CONFIG__MODEL: "gpt-4o-mini"
+          CONFIG__LANGUAGE: "ja"
+          PR_REVIEWER__EXTRA_INSTRUCTIONS: "必ず日本語でレビューコメントを記述してください。All review comments must be written in Japanese language."
         run: |
           echo "=== Environment ==="
           echo "Model: gpt-4o-mini (OpenAI)"
+          echo "Language: Japanese"
           echo "=== Running PR-Agent ==="
           python -m pr_agent.cli \
             --pr_url=https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }} \
