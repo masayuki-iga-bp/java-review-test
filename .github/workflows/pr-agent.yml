@@ -52,6 +52,7 @@ jobs:
           CONFIG__MODEL: azure/gpt-5.2
           CONFIG__MODEL_TURBO: azure/gpt-5.2
           CONFIG__FALLBACK_MODELS: "['azure/gpt-5.2']"
+          CONFIG__TOKENIZER: o200k_base
           PR_REVIEWER__MODEL: azure/gpt-5.2
           PR_REVIEWER__MODEL_TURBO: azure/gpt-5.2
         run: |

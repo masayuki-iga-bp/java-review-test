@@ -3,6 +3,7 @@ model = "azure/gpt-5.2"
 model_turbo = "azure/gpt-5.2"
 fallback_models = ["azure/gpt-5.2"]
 custom_model_max_tokens = 128000
+tokenizer = "o200k_base"
 
 [openai]
 api_type = "azure"
