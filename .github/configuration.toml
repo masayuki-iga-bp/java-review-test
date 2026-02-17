@@ -1,7 +1,7 @@
 [config]
-model = "azure/gpt-4o"
-model_turbo = "azure/gpt-4o"
-fallback_models = ["azure/gpt-4o"]
+model = "gpt-4o"
+model_turbo = "gpt-4o"
+fallback_models = ["gpt-4o"]
 custom_model_max_tokens = 128000
 
 [openai]
@@ -9,11 +9,11 @@ api_type = "azure"
 api_version = "2024-10-01-preview"
 
 [pr_reviewer]
-model = "azure/gpt-4o"
-model_turbo = "azure/gpt-4o"
+model = "gpt-4o"
+model_turbo = "gpt-4o"
 
 [pr_description]
-model = "azure/gpt-4o"
+model = "gpt-4o"
 
 [pr_code_suggestions]
-model = "azure/gpt-4o"
+model = "gpt-4o"

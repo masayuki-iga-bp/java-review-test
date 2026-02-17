@@ -40,29 +40,9 @@ jobs:
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AZURE_OPENAI_API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
           AZURE_OPENAI_DEPLOYMENT_ID: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_ID }}
-          OPENAI_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-          OPENAI_API_TYPE: azure
-          OPENAI_API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
-          OPENAI_DEPLOYMENT_ID: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_ID }}
-          OPENAI_API_VERSION: "2024-10-01-preview"
-          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-          AZURE_API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
-          AZURE_API_VERSION: "2024-10-01-preview"
           LITELLM_LOG: DEBUG
-          CONFIG__MODEL: azure/gpt-4o
-          CONFIG__MODEL_TURBO: azure/gpt-4o
-          CONFIG__FALLBACK_MODELS: "['azure/gpt-4o']"
-          PR_REVIEWER__MODEL: azure/gpt-4o
-          PR_REVIEWER__MODEL_TURBO: azure/gpt-4o
         run: |
-          echo "=== Environment Variables ==="
-          echo "OPENAI_API_TYPE: $OPENAI_API_TYPE"
-          echo "OPENAI_API_BASE: $OPENAI_API_BASE"
-          echo "OPENAI_DEPLOYMENT_ID: $OPENAI_DEPLOYMENT_ID"
-          echo "OPENAI_API_VERSION: $OPENAI_API_VERSION"
-          echo "CONFIG__MODEL: $CONFIG__MODEL"
-          echo "DEPLOYMENT_ID: $OPENAI_DEPLOYMENT_ID"
-          echo "=== Running PR-Agent ==="
-          python -m pr_agent.cli \
-            --pr_url=https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }} \
-            review
+          chmod +x .github/scripts/run_pr_agent.py
+          python .github/scripts/run_pr_agent.py \
+            https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}
+
