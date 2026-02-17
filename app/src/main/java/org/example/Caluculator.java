@@ -46,4 +46,37 @@ public class Caluculator {
         }
         return 0;
     }
+
+    // 問題のあるコード: JavaDocなし、例外処理なし、マジックナンバーあり
+    public double divideWithLogging(int numerator, int denominator) {
+        System.out.println("Dividing " + numerator + " by " + denominator);
+        double result = numerator / denominator;
+        if (result > 999) {
+            result = 999;
+        }
+        return result;
+    }
+
+    // 問題のあるコード: 複雑なネストされた条件、JavaDocなし
+    public String evaluateScore(int score) {
+        String grade;
+        if (score >= 90) {
+            if (score >= 95) {
+                if (score >= 98) {
+                    grade = "A+";
+                } else {
+                    grade = "A";
+                }
+            } else {
+                grade = "A-";
+            }
+        } else if (score >= 80) {
+            grade = "B";
+        } else if (score >= 70) {
+            grade = "C";
+        } else {
+            grade = "F";
+        }
+        return grade;
+    }
 }
