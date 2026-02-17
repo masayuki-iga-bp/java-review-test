@@ -302,15 +302,7 @@ git switch -c feature/test-pr-agent
 
 #### 4-2. テスト用のコード変更を追加
 
-以下のいずれかを選択してください：
-
-**オプションA: 簡単な動作確認（README.mdに1行追加）**
-
-```bash
-echo "PR-Agent test" >> README.md
-```
-
-**オプションB: 実践的なテスト（意図的に問題のあるJavaコードを追加）** ← 推奨
+意図的に問題のあるJavaコードを追加して、PR-Agentがどのような指摘をするか確認します。
 
 `app/src/main/java/myproject/Calculator.java` を作成：
 
