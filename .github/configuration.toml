@@ -1,0 +1,29 @@
+[config]
+model = "azure/gpt-5.2"
+model_turbo = "azure/gpt-5.2"
+fallback_models = []
+custom_model_max_tokens = 128000
+
+[github]
+user_token = "${GITHUB_TOKEN}"
+
+[openai]
+api_type = "azure"
+api_version = "2024-10-01-preview"
+
+[litellm]
+drop_params = true
+set_verbose = true
+
+[pr_reviewer]
+model = "azure/gpt-5.2"
+model_turbo = "azure/gpt-5.2"
+num_code_suggestions = 3
+require_tests_review = false
+require_score_review = false
+
+[pr_description]
+model = "azure/gpt-5.2"
+
+[pr_code_suggestions]
+model = "azure/gpt-5.2"
