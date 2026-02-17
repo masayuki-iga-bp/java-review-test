@@ -304,10 +304,10 @@ git switch -c feature/test-pr-agent
 
 意図的に問題のあるJavaコードを追加して、PR-Agentがどのような指摘をするか確認します。
 
-`app/src/main/java/myproject/Calculator.java` を作成：
+`app/src/main/java/org/example/Calculator.java` を作成：
 
 ```java
-package myproject;
+package org.example;
 
 public class Calculator {
     // 問題: JavaDocなし、例外処理なし
