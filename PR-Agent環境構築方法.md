@@ -41,6 +41,79 @@
 
 ---
 
+## 🏗️ プロジェクト作成（0からの場合）
+
+既存のJavaプロジェクトがある場合は、このセクションをスキップしてください。
+
+### 方法1: Gradleで新規作成（推奨）
+
+```bash
+# 新しいディレクトリを作成して移動
+mkdir my-java-project
+cd my-java-project
+
+# Gradleプロジェクトを初期化
+gradle init
+```
+
+**以下の質問に答えます:**
+
+| 質問 | 選択肢 | 説明 |
+|------|--------|------|
+| type of build | `application` | アプリケーションを作成 |
+| language | `Java` | Java を選択 |
+| target Java version | `17` | Java 17（推奨） |
+| Project name | `(そのままEnter)` | ディレクトリ名が使われる |
+| application structure | `1: Single application` | 単一アプリ |
+| build script DSL | `1: Groovy` | Groovy（標準） |
+| test framework | `4: JUnit Jupiter` | JUnit 5 |
+| Generate new APIs | `no` | そのままEnter |
+
+**完了すると以下の構造が作成されます:**
+
+```
+my-java-project/
+├── app/
+│   └── src/
+│       ├── main/java/    ← Javaコードをここに書く
+│       └── test/java/    ← テストコードをここに書く
+├── gradle/
+├── gradlew
+├── gradlew.bat
+├── build.gradle
+└── settings.gradle
+```
+
+### 方法2: GitHubで新規リポジトリ作成
+
+```bash
+# GitHubに新しいリポジトリを作成（Web UIで）
+# 1. GitHub.com → New repository
+# 2. Repository name を入力（例: my-java-project）
+# 3. "Add a README file" をチェック
+# 4. Create repository
+
+# ローカルにクローン
+git clone https://github.com/your-username/my-java-project.git
+cd my-java-project
+
+# Gradleプロジェクトを初期化（上記と同じ手順）
+gradle init
+```
+
+### ✅ プロジェクト作成完了の確認
+
+以下のコマンドが成功すればOK:
+
+```bash
+# ビルドテスト
+./gradlew build
+
+# 成功すると "BUILD SUCCESSFUL" と表示される
+```
+
+---
+
 ## 🚀 セットアップ手順
 
 ### ステップ1: OpenAI APIキーを取得
@@ -76,18 +149,146 @@
 
 ✅ これで設定完了です。
 
+**💡 重要:** APIキーはリポジトリごとに設定が必要です。複数のプロジェクトで使う場合、同じAPIキーの値を各リポジトリに設定できます。
+
 ---
 
-### ステップ3: ワークフローファイルを確認
+### ステップ3: ワークフローファイルを作成
 
-このリポジトリには既に設定済みのファイルがあります：
+PR-Agentを動かすための設定ファイルを作成します。
 
+#### 3-1. ディレクトリを作成
+
+```bash
+mkdir -p .github/workflows
 ```
-.github/workflows/pr-agent-openai.yml  ✅ OpenAI版（有効）
-.github/workflows/pr-agent.yml.disabled  ⚠️ Azure版（無効化済み）
+
+#### 3-2. ワークフローファイルを作成
+
+`.github/workflows/pr-agent-openai.yml` というファイルを作成し、以下の内容を貼り付けます：
+
+<details>
+<summary>📄 pr-agent-openai.yml の内容（クリックして展開）</summary>
+
+```yaml
+name: PR Agent Review (OpenAI)
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  pull_request_review_comment:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  pr-agent:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PR-Agent
+        run: |
+          pip install --upgrade pr-agent
+          pip install --upgrade litellm httpx openai
+
+      - name: Test OpenAI API Connection
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          echo "=== Testing OpenAI API with curl ==="
+          curl -X POST https://api.openai.com/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${OPENAI_API_KEY}" \
+            -d '{
+              "model": "gpt-4o-mini",
+              "messages": [{"role": "user", "content": "Test"}],
+              "max_tokens": 10
+            }' \
+            -w "\nHTTP Status: %{http_code}\n" \
+            2>&1 | tee curl-result.log
+          
+          if grep -q "200" curl-result.log || grep -q "content" curl-result.log; then
+            echo "✅ OpenAI API connection successful!"
+          else
+            echo "❌ OpenAI API connection failed"
+            exit 1
+          fi
+
+      - name: Create configuration
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat > .pr_agent.toml << CONFIG
+          [config]
+          model = "gpt-4o-mini"
+          model_turbo = "gpt-4o-mini"
+          fallback_models = []
+          language = "ja"
+          
+          [github]
+          user_token = "${GITHUB_TOKEN}"
+          
+          [pr_reviewer]
+          num_code_suggestions = 3
+          require_tests_review = false
+          require_score_review = false
+          extra_instructions = "すべてのレビューコメントを日本語で記述してください。"
+          
+          [pr_description]
+          publish_description_as_comment = true
+          
+          [pr_code_suggestions]
+          num_code_suggestions = 3
+          CONFIG
+          
+          echo "=== Configuration file content ==="
+          cat .pr_agent.toml
+
+      - name: Run PR-Agent Review
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI__KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB__USER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CONFIG__MODEL: "gpt-4o-mini"
+          CONFIG__LANGUAGE: "ja"
+          PR_REVIEWER__EXTRA_INSTRUCTIONS: "必ず日本語でレビューコメントを記述してください。All review comments must be written in Japanese language."
+        run: |
+          echo "=== Environment ==="
+          echo "Model: gpt-4o-mini (OpenAI)"
+          echo "Language: Japanese"
+          echo "=== Running PR-Agent ==="
+          python -m pr_agent.cli \
+            --pr_url=https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }} \
+            review
 ```
 
-**何もする必要はありません。**
+</details>
+
+**このファイルの役割:**
+- PRが作成されると自動実行
+- OpenAI APIを使ってコードレビュー
+- レビューを日本語で投稿
+
+#### 3-3. ファイルをコミット
+
+```bash
+git add .github/workflows/pr-agent-openai.yml
+git commit -m "Add PR-Agent workflow"
+git push origin main
+```
+
+✅ これでセットアップ完了です。
 
 ---
 
@@ -101,11 +302,40 @@ git checkout -b feature/test-pr-agent
 
 #### 4-2. テスト用のコード変更を追加
 
-任意のファイルを編集（例: README.mdに1行追加）
+**簡単な例: README.mdに1行追加**
+
+```bash
+echo "PR-Agent test" >> README.md
+```
+
+**Javaコードの例: 意図的に問題のあるコードを追加**
+
+`app/src/main/java/myproject/Calculator.java` を作成：
+
+```java
+package myproject;
+
+public class Calculator {
+    // 問題: JavaDocなし、例外処理なし
+    public int divide(int a, int b) {
+        return a / b;
+    }
+    
+    // 問題: マジックナンバー、nullチェックなし
+    public int getLength(String text) {
+        if (text.length() > 100) {
+            return 100;
+        }
+        return text.length();
+    }
+}
+```
+
+**変更をコミット:**
 
 ```bash
 git add -A
-git commit -m "PR-Agent動作テスト"
+git commit -m "Add test code for PR-Agent review"
 git push -u origin feature/test-pr-agent
 ```
 
