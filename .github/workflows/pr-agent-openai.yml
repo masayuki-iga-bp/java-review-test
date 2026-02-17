@@ -1,0 +1,94 @@
+name: PR Agent Review (OpenAI)
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  pull_request_review_comment:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  pr-agent:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PR-Agent
+        run: |
+          pip install --upgrade pr-agent
+
+      - name: Test OpenAI API Connection
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          echo "=== Testing OpenAI API with curl ==="
+          curl -X POST https://api.openai.com/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${OPENAI_API_KEY}" \
+            -d '{
+              "model": "gpt-4o-mini",
+              "messages": [{"role": "user", "content": "Test"}],
+              "max_tokens": 10
+            }' \
+            -w "\nHTTP Status: %{http_code}\n" \
+            2>&1 | tee curl-result.log
+          
+          if grep -q "200" curl-result.log || grep -q "content" curl-result.log; then
+            echo "✅ OpenAI API connection successful!"
+          else
+            echo "❌ OpenAI API connection failed"
+            exit 1
+          fi
+
+      - name: Create configuration
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat > .pr_agent.toml << CONFIG
+          [config]
+          model = "gpt-4o-mini"
+          model_turbo = "gpt-4o-mini"
+          fallback_models = []
+          
+          [github]
+          user_token = "${GITHUB_TOKEN}"
+          
+          [pr_reviewer]
+          num_code_suggestions = 3
+          require_tests_review = false
+          require_score_review = false
+          
+          [pr_description]
+          publish_description_as_comment = true
+          
+          [pr_code_suggestions]
+          num_code_suggestions = 3
+          CONFIG
+          
+          echo "=== Configuration file content ==="
+          cat .pr_agent.toml
+
+      - name: Run PR-Agent Review
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI__KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB__USER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CONFIG__MODEL: "gpt-4o-mini"
+        run: |
+          echo "=== Environment ==="
+          echo "Model: gpt-4o-mini (OpenAI)"
+          echo "=== Running PR-Agent ==="
+          python -m pr_agent.cli \
+            --pr_url=https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }} \
+            review

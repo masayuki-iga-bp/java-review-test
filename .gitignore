@@ -7,3 +7,5 @@ build
 # Ignore PR-Agent configuration files with secrets
 .secrets.toml
 configuration.toml
+# Allow .github/configuration.toml (no secrets)
+!.github/configuration.toml

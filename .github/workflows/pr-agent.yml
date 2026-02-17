@@ -25,20 +25,47 @@ jobs:
 
       - name: Install PR-Agent
         run: |
-          pip install pr-agent
+          pip install --upgrade pr-agent
+          pip install --upgrade litellm httpx openai
+          
+      - name: Copy configuration
+        run: |
+          cp .github/pr_agent.toml ./.pr_agent.toml
+          echo "=== Configuration file content ==="
+          cat .pr_agent.toml
+
+      - name: Test Azure OpenAI Direct API Call
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+        run: |
+          echo "=== Testing Azure OpenAI API with curl ==="
+          
+          # Standard format test
+          echo "Test 1: Standard API format"
+          curl -X POST \
+            "https://aoairg-sub-aoai.openai.azure.com/openai/deployments/gpt-5.2/chat/completions?api-version=2024-10-01-preview" \
+            -H "Content-Type: application/json" \
+            -H "api-key: ${AZURE_API_KEY}" \
+            -d '{"messages": [{"role": "user", "content": "Test"}], "max_tokens": 10}' \
+            -w "\nHTTP Status: %{http_code}\n" \
+            2>&1 | tee curl-result.log
+          
+          if grep -q "200" curl-result.log || grep -q "content" curl-result.log; then
+            echo "✅ Direct API call successful!"
+          else
+            echo "⚠️  API call may have issues - continuing anyway"
+          fi
 
       - name: Run PR-Agent Review
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB__USER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AZURE_OPENAI__API_TYPE: azure
-          AZURE_OPENAI__API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
-          AZURE_OPENAI__API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-          AZURE_OPENAI__API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
-          AZURE_OPENAI__DEPLOYMENT_ID: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_ID }}
-          CONFIG__MODEL: azure/${{ secrets.AZURE_OPENAI_DEPLOYMENT_ID }}
-          CONFIG__CUSTOM_MODEL_MAX_TOKENS: "128000"
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
+          AZURE_OPENAI_DEPLOYMENT_ID: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_ID }}
+          LITELLM_LOG: DEBUG
         run: |
-          python -m pr_agent.cli \
-            --pr_url=https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }} \
-            review
+          chmod +x .github/scripts/run_pr_agent.py
+          python .github/scripts/run_pr_agent.py \
+            https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}
+
