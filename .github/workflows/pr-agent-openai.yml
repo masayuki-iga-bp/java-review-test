@@ -61,6 +61,7 @@ jobs:
           model = "gpt-4o-mini"
           model_turbo = "gpt-4o-mini"
           fallback_models = []
+          language = "ja"
           
           [github]
           user_token = "${GITHUB_TOKEN}"

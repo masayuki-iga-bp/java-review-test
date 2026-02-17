@@ -3,6 +3,7 @@ model = "azure/gpt-5.2"
 model_turbo = "azure/gpt-5.2"
 fallback_models = []
 custom_model_max_tokens = 128000
+language = "ja"
 
 [github]
 user_token = "${GITHUB_TOKEN}"
