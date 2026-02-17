@@ -48,7 +48,20 @@ jobs:
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AZURE_API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
           AZURE_API_VERSION: "2024-10-01-preview"
+          LITELLM_LOG: DEBUG
+          CONFIG__MODEL: azure/gpt-5.2
+          CONFIG__MODEL_TURBO: azure/gpt-5.2
+          CONFIG__FALLBACK_MODELS: "['azure/gpt-5.2']"
+          PR_REVIEWER__MODEL: azure/gpt-5.2
+          PR_REVIEWER__MODEL_TURBO: azure/gpt-5.2
         run: |
+          echo "=== Environment Variables ==="
+          echo "OPENAI_API_TYPE: $OPENAI_API_TYPE"
+          echo "OPENAI_API_BASE: $OPENAI_API_BASE"
+          echo "OPENAI_DEPLOYMENT_ID: $OPENAI_DEPLOYMENT_ID"
+          echo "OPENAI_API_VERSION: $OPENAI_API_VERSION"
+          echo "CONFIG__MODEL: $CONFIG__MODEL"
+          echo "=== Running PR-Agent ==="
           python -m pr_agent.cli \
             --pr_url=https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }} \
             review
