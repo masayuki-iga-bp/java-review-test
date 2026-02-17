@@ -30,9 +30,9 @@ jobs:
           
       - name: Copy configuration
         run: |
-          cp .github/configuration.toml ./configuration.toml
+          cp .github/pr_agent.toml ./.pr_agent.toml
           echo "=== Configuration file content ==="
-          cat configuration.toml
+          cat .pr_agent.toml
 
       - name: Test Azure OpenAI Direct API Call
         env:

@@ -55,8 +55,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p .github
-          cat > .github/configuration.toml << CONFIG
+          cat > .pr_agent.toml << CONFIG
           [config]
           model = "gpt-4o-mini"
           model_turbo = "gpt-4o-mini"
@@ -77,9 +76,8 @@ jobs:
           num_code_suggestions = 3
           CONFIG
           
-          cp .github/configuration.toml ./configuration.toml
           echo "=== Configuration file content ==="
-          cat configuration.toml
+          cat .pr_agent.toml
 
       - name: Run PR-Agent Review
         env:
