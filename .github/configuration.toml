@@ -4,6 +4,10 @@ model_turbo = "azure/gpt-4"
 fallback_models = ["azure/gpt-4"]
 custom_model_max_tokens = 128000
 
+[openai]
+api_type = "azure"
+api_version = "2024-10-01-preview"
+
 [pr_reviewer]
 model = "azure/gpt-4"
 model_turbo = "azure/gpt-4"

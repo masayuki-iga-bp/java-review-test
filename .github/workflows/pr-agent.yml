@@ -30,6 +30,8 @@ jobs:
       - name: Copy configuration
         run: |
           cp .github/configuration.toml ./configuration.toml
+          echo "=== Configuration file content ==="
+          cat configuration.toml
 
       - name: Run PR-Agent Review
         env:
@@ -38,15 +40,15 @@ jobs:
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AZURE_OPENAI_API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
           AZURE_OPENAI_DEPLOYMENT_ID: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_ID }}
+          OPENAI_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          OPENAI_API_TYPE: azure
+          OPENAI_API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
+          OPENAI_DEPLOYMENT_ID: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_ID }}
+          OPENAI_API_VERSION: "2024-10-01-preview"
+          AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_API_BASE: ${{ secrets.AZURE_OPENAI_API_BASE }}
+          AZURE_API_VERSION: "2024-10-01-preview"
         run: |
-          export OPENAI__KEY="${AZURE_OPENAI_API_KEY}"
-          export OPENAI__API_TYPE="azure"
-          export OPENAI_API_VERSION="2024-10-01-preview"
-          export OPENAI__API_BASE="${AZURE_OPENAI_API_BASE}"
-          export OPENAI__DEPLOYMENT_ID="${AZURE_OPENAI_DEPLOYMENT_ID}"
-          export AZURE_API_BASE="${AZURE_OPENAI_API_BASE}"
-          export AZURE_API_KEY="${AZURE_OPENAI_API_KEY}"
-          export AZURE_API_VERSION="2024-10-01-preview"
           python -m pr_agent.cli \
             --pr_url=https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }} \
             review
